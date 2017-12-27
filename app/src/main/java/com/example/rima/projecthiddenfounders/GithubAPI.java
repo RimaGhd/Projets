@@ -9,6 +9,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 /**
@@ -18,7 +19,7 @@ import retrofit2.http.Url;
 public interface GithubAPI {
 
     String ENDPOINT = "https://api.github.com/";
-    @GET("search/repositories?q=created:>2017-10-22&sort=stars&order=desc&page=1")
-    Call<RepoItems> getRepos();
+    @GET("search/repositories?q=created:>2017-10-22&sort=stars&order=desc")
+    Call<RepoItems> getRepos(@Query("page") int pageNumber);
 
     }

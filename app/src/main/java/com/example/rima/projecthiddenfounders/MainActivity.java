@@ -46,16 +46,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    GithubAPI githubAPI;
-    Spinner repositoriesSpinner;
     private Handler handler;
 
-    private RepoItems repoList = new RepoItems();
-    private RepoItems adapterData = new RepoItems();
+    public RepoItems repoList = new RepoItems();
     private RecyclerView recyclerView;
     private RepoAdapter mAdapter;
     ActionBar actionBar;
-    private BottomNavigationView bottom_navigation;
+    private int pageNumber = 1;
+    public boolean queryDone;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -78,34 +76,37 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
-        mAdapter = new RepoAdapter();
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new RepoAdapter(recyclerView,this);
         recyclerView.setAdapter(mAdapter);
 
         actionBar=getSupportActionBar();
         BottomNavigationView bottom_navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        createGithubAPI();
+        createGithubAPI(pageNumber);
 
         mAdapter.setOnLoadMoreListener(new RepoAdapter.OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
-                adapterData.setItems(null);
-                mAdapter.notifyItemInserted(adapterData.size() - 1);
+                Log.d("logging","end scroll");
+                //adapterData.setItems(null);
+                //mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
 
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        adapterData.remove(adapterData.size() - 1);
-                        mAdapter.notifyItemRemoved(adapterData.size());
-                        for (int i = 0; i < 15; i++) {
-                            mAdapter.notifyItemInserted(adapterData.size());
+                        //adapterData.remove(mAdapter.getItemCount() - 1);
+                        //mAdapter.notifyItemRemoved(mAdapter.getItemCount());
+                        if (queryDone){
+                            pageNumber++;
+                            createGithubAPI(pageNumber);
                         }
+
                         mAdapter.setLoaded();
                     }
-                }, 2000);
+                }, 1000);
                 System.out.println("load");
             }
         });
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void createGithubAPI() {
+    private void createGithubAPI(int pageNumber) {
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
                 .create();
@@ -138,11 +139,12 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         GithubAPI git = retrofit.create(GithubAPI.class);
-        Call<RepoItems> call = (Call<RepoItems>) git.getRepos();
+        Call<RepoItems> call = (Call<RepoItems>) git.getRepos(pageNumber);
         call.enqueue(new Callback<RepoItems>() {
             @Override
             public void onResponse(Call<RepoItems> call, Response<RepoItems> response) {
                 RepoItems model = response.body();
+                repoList = model;
                 if (model==null) {
                     ResponseBody responseBody = response.errorBody();
                     if (responseBody!=null) {
@@ -158,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     //200
                     mAdapter.setData(model);
-                    adapterData = model;
+                    queryDone = true;
+                    //adapterData = model;
                     Log.d("onresponse","responseBody Github Name : "+model.getItems().get(0).getName()
                             +"\nDescription : "+model.getItems().get(0).getDescription()
                             +"\nOwner : "+model.getItems().get(0).getOwner()
@@ -171,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<RepoItems> call, Throwable t) {
                 Log.e("onfailure","on failure"+t,t);
+                queryDone = true;
             }
         });
 

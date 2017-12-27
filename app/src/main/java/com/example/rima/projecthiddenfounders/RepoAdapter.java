@@ -1,5 +1,6 @@
 package com.example.rima.projecthiddenfounders;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v7.widget.LinearLayoutManager;
@@ -7,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,19 +18,22 @@ import java.util.List;
  * Created by rima on 24/12/2017.
  */
 
-public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.RepoViewHolder> {
+public class RepoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<GithubRepo> repoList;
     private OnLoadMoreListener onLoadMoreListener;
     private int visibleThreshold = 5;
     private int lastVisibleItem, totalItemCount;
     private boolean loading;
-    protected Context context;
+    private Activity activity;
 
-    public RepoAdapter(Context context, List<GithubRepo> repoList, RecyclerView recyclerView) {
-        this.repoList = repoList;
-        this.context = context;
+    private final int VIEW_TYPE_ITEM = 0;
+    private final int VIEW_TYPE_LOADING = 1;
+
+    public RepoAdapter(RecyclerView recyclerView, Activity activity) {
+        this.repoList = new ArrayList<>();
+        this.activity = activity;
         if(recyclerView.getLayoutManager() instanceof LinearLayoutManager){
-            final LinearLayoutManager linearLayoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+            final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
             recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -52,23 +57,32 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.RepoViewHolder
     }
 
     @Override
-    public RepoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.repo_list_row, parent, false);
-        return new RepoViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        //if (viewType == VIEW_TYPE_ITEM) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.repo_list_row, parent, false);
+            return new RepoViewHolder(view);
+        /*} else if (viewType == VIEW_TYPE_LOADING) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.progress_item, parent, false);
+            return new ProgressViewHolder(view);
+        } else
+            return null;*/
     }
 
     @Override
-    public void onBindViewHolder(RepoViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
         if(holder instanceof RepoViewHolder){
             GithubRepo repositery = repoList.get(position);
-            holder.repoName.setText(repositery.getName());
-            holder.repoDesc.setText(repositery.getDescription());
-            holder.repoOwner.setText(repositery.getOwner().getLogin());
-            holder.repoStars.setText(String.valueOf(repositery.getNumberOfStars()));
+            RepoViewHolder repoViewHolder = (RepoViewHolder) holder;
+            repoViewHolder.repoName.setText(repositery.getName());
+            repoViewHolder.repoDesc.setText(repositery.getDescription());
+            repoViewHolder.repoOwner.setText(repositery.getOwner().getLogin());
+            repoViewHolder.repoStars.setText(String.valueOf(repositery.getNumberOfStars()));
         }else{
-            ((ProgressViewHolder)holder).progressBar.setIndeterminate(true);
+            ProgressViewHolder loadingViewHolder = (ProgressViewHolder) holder;
+            loadingViewHolder.progressBar.setIndeterminate(true);
         }
 
     }
@@ -78,16 +92,17 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.RepoViewHolder
     }
 
     public void setData(RepoItems list){
-        this.repoList = list.getItems();
+        this.repoList.addAll(list.getItems());
         notifyDataSetChanged();
     }
+
 
     @Override
     public int getItemCount() {
         return repoList.size();
     }
 
-    public static class RepoViewHolder extends RecyclerView.ViewHolder{
+    public class RepoViewHolder extends RecyclerView.ViewHolder{
 
         TextView repoName, repoDesc, repoStars, repoOwner;
         public RepoViewHolder(View itemView) {
@@ -98,6 +113,17 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.RepoViewHolder
             repoOwner = (TextView)itemView.findViewById(R.id.repo_owner_name);
         }
     }
+
+    public class ProgressViewHolder extends RecyclerView.ViewHolder {
+        public ProgressBar progressBar;
+
+        public ProgressViewHolder(View itemView) {
+            super(itemView);
+            progressBar = (ProgressBar)itemView.findViewById(R.id.progressBar);
+
+        }
+    }
+
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener){
         this.onLoadMoreListener = onLoadMoreListener;
     }
@@ -105,9 +131,6 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.RepoViewHolder
         void onLoadMore();
     }
     public void setLoaded() {
-        loading = false;
-    }
-    public void setLoad(){
         loading = false;
     }
 }
