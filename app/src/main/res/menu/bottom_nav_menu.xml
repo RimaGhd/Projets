@@ -3,12 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/Gallery"
+        android:id="@+id/trending"
         android:icon="@drawable/ic_star"
         android:title="Trending" />
     <item
-    android:id="@+id/Wifi"
-    android:icon="@drawable/ic_settings"
-    android:title="Settings" />
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings" />
 
 </menu>

@@ -56,17 +56,11 @@ public class MainActivity extends AppCompatActivity {
     ActionBar actionBar;
     private int pageNumber = 1;
     private TextView tvEmptyView;
+    private TextView tvHeaderTitle;
     private ProgressBar progressBar;
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+    private BottomNavigationView bottomNavigationView;
 
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            return false;
-        }
-
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,10 +68,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
         handler = new Handler();
-        progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         tvEmptyView = (TextView)findViewById(R.id.tvEmptyView);
+        tvHeaderTitle = (TextView)findViewById(R.id.header_title);
+        bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -86,17 +82,24 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(mAdapter);
 
         actionBar=getSupportActionBar();
-        BottomNavigationView bottom_navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-        bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        createGithubAPI(pageNumber);
-        /*if (repoList.getItems().isEmpty()) {
-            recyclerView.setVisibility(View.GONE);
-            tvEmptyView.setVisibility(View.VISIBLE);
 
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            tvEmptyView.setVisibility(View.GONE);
-        }*/
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.trending:
+                        tvHeaderTitle.setText(R.string.trending);
+                        return true;
+                    case R.id.settings:
+                        tvHeaderTitle.setText(R.string.setting);
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        createGithubAPI(pageNumber);
         mAdapter.setOnLoadMoreListener(new RepoAdapter.OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
@@ -105,8 +108,8 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                            pageNumber++;
-                            createGithubAPI(pageNumber);
+                        pageNumber++;
+                        createGithubAPI(pageNumber);
                         mAdapter.setLoaded();
                     }
                 }, 1000);
@@ -155,12 +158,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     mAdapter.setData(model);
-                    //adapterData = model;
-                    Log.d("onresponse","responseBody Github Name : "+model.getItems().get(0).getName()
-                            +"\nDescription : "+model.getItems().get(0).getDescription()
-                            +"\nOwner : "+model.getItems().get(0).getOwner().getLogin()
-                            +"\nNum of stars : "+model.getItems().get(0).getNumberOfStars()
-                            +"\nAvatar url : "+model.getItems().get(0).getOwner().getAvatarUrl());
+
+                    if (repoList.getItems().size() == 0) {
+                        recyclerView.setVisibility(View.GONE);
+                        tvEmptyView.setVisibility(View.VISIBLE);
+
+                    } else {
+                        recyclerView.setVisibility(View.VISIBLE);
+                        tvEmptyView.setVisibility(View.GONE);
+                    }
                 }
 
             }
@@ -169,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<RepoItems> call, Throwable t) {
                 Log.e("onfailure","on failure"+t,t);
                 progressBar.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.GONE);
+                tvEmptyView.setVisibility(View.VISIBLE);
             }
         });
 

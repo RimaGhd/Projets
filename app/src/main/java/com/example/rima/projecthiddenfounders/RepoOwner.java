@@ -3,10 +3,6 @@ package com.example.rima.projecthiddenfounders;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by rima on 25/12/2017.
- */
-
 public class RepoOwner {
 
     private String login;
