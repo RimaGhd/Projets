@@ -3,13 +3,17 @@ package com.example.rima.projecthiddenfounders;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +29,6 @@ public class RepoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private int lastVisibleItem, totalItemCount;
     private boolean loading;
     private Activity activity;
-
-    private final int VIEW_TYPE_ITEM = 0;
-    private final int VIEW_TYPE_LOADING = 1;
 
     public RepoAdapter(RecyclerView recyclerView, Activity activity) {
         this.repoList = new ArrayList<>();
@@ -58,16 +59,9 @@ public class RepoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //if (viewType == VIEW_TYPE_ITEM) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.repo_list_row, parent, false);
             return new RepoViewHolder(view);
-        /*} else if (viewType == VIEW_TYPE_LOADING) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.progress_item, parent, false);
-            return new ProgressViewHolder(view);
-        } else
-            return null;*/
     }
 
     @Override
@@ -80,9 +74,8 @@ public class RepoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             repoViewHolder.repoDesc.setText(repositery.getDescription());
             repoViewHolder.repoOwner.setText(repositery.getOwner().getLogin());
             repoViewHolder.repoStars.setText(String.valueOf(repositery.getNumberOfStars()));
-        }else{
-            ProgressViewHolder loadingViewHolder = (ProgressViewHolder) holder;
-            loadingViewHolder.progressBar.setIndeterminate(true);
+            Picasso.with(activity.getApplicationContext()).load(repositery.getOwner().getAvatarUrl()).into(repoViewHolder.avatarImage);
+            //repoViewHolder.avatarImage.setImageURI(Uri.parse(repositery.getAvatarUrl()));
         }
 
     }
@@ -105,22 +98,14 @@ public class RepoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public class RepoViewHolder extends RecyclerView.ViewHolder{
 
         TextView repoName, repoDesc, repoStars, repoOwner;
+        ImageView avatarImage;
         public RepoViewHolder(View itemView) {
             super(itemView);
             repoName = (TextView)itemView.findViewById(R.id.repo_name);
             repoDesc = (TextView)itemView.findViewById(R.id.repo_description);
             repoStars = (TextView)itemView.findViewById(R.id.number_of_stars);
             repoOwner = (TextView)itemView.findViewById(R.id.repo_owner_name);
-        }
-    }
-
-    public class ProgressViewHolder extends RecyclerView.ViewHolder {
-        public ProgressBar progressBar;
-
-        public ProgressViewHolder(View itemView) {
-            super(itemView);
-            progressBar = (ProgressBar)itemView.findViewById(R.id.progressBar);
-
+            avatarImage = (ImageView)itemView.findViewById(R.id.imageView);
         }
     }
 

@@ -18,7 +18,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -53,9 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private RepoAdapter mAdapter;
     ActionBar actionBar;
     private int pageNumber = 1;
-    public boolean queryDone;
-
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private TextView tvEmptyView;
+    private ProgressBar progressBar;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -73,8 +74,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
         handler = new Handler();
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        tvEmptyView = (TextView)findViewById(R.id.tvEmptyView);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -86,40 +89,30 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottom_navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         createGithubAPI(pageNumber);
+        /*if (repoList.getItems().isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            tvEmptyView.setVisibility(View.VISIBLE);
 
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            tvEmptyView.setVisibility(View.GONE);
+        }*/
         mAdapter.setOnLoadMoreListener(new RepoAdapter.OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
                 Log.d("logging","end scroll");
-                //adapterData.setItems(null);
-                //mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
 
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //adapterData.remove(mAdapter.getItemCount() - 1);
-                        //mAdapter.notifyItemRemoved(mAdapter.getItemCount());
-                        if (queryDone){
                             pageNumber++;
                             createGithubAPI(pageNumber);
-                        }
-
                         mAdapter.setLoaded();
                     }
                 }, 1000);
                 System.out.println("load");
             }
         });
-
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (compositeDisposable != null && !compositeDisposable.isDisposed()) {
-            compositeDisposable.dispose();
-        }
     }
 
     @Override
@@ -138,12 +131,15 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
+        progressBar.setVisibility(View.VISIBLE);
+
         GithubAPI git = retrofit.create(GithubAPI.class);
         Call<RepoItems> call = (Call<RepoItems>) git.getRepos(pageNumber);
         call.enqueue(new Callback<RepoItems>() {
             @Override
             public void onResponse(Call<RepoItems> call, Response<RepoItems> response) {
                 RepoItems model = response.body();
+                progressBar.setVisibility(View.GONE);
                 repoList = model;
                 if (model==null) {
                     ResponseBody responseBody = response.errorBody();
@@ -158,15 +154,13 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("responseBody","responseBody = null");
                     }
                 } else {
-                    //200
                     mAdapter.setData(model);
-                    queryDone = true;
                     //adapterData = model;
                     Log.d("onresponse","responseBody Github Name : "+model.getItems().get(0).getName()
                             +"\nDescription : "+model.getItems().get(0).getDescription()
-                            +"\nOwner : "+model.getItems().get(0).getOwner()
-                            +"\nNum of stars : "+model.getItems().get(0).getNumberOfStars());
-
+                            +"\nOwner : "+model.getItems().get(0).getOwner().getLogin()
+                            +"\nNum of stars : "+model.getItems().get(0).getNumberOfStars()
+                            +"\nAvatar url : "+model.getItems().get(0).getOwner().getAvatarUrl());
                 }
 
             }
@@ -174,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<RepoItems> call, Throwable t) {
                 Log.e("onfailure","on failure"+t,t);
-                queryDone = true;
+                progressBar.setVisibility(View.GONE);
             }
         });
 

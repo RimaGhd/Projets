@@ -18,7 +18,4 @@ public class RepoItems {
         this.items = items;
     }
 
-    public void remove(int i) {
-        items.remove(i);
-    }
 }

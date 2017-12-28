@@ -1,24 +1,29 @@
 package com.example.rima.projecthiddenfounders;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by rima on 25/12/2017.
  */
 
 public class RepoOwner {
 
-    private String name;
+    private String login;
 
-    public RepoOwner() {
+    @SerializedName("avatar_url")
+    @Expose
+    private String avatarUrl;
+
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
-    public RepoOwner(String name, String login) {
-
-        this.name = name;
-        this.login = login;
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 
     public String getLogin() {
-
         return login;
     }
 
@@ -26,5 +31,4 @@ public class RepoOwner {
         this.login = login;
     }
 
-    private String login;
 }
