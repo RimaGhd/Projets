@@ -8,14 +8,10 @@ import java.util.List;
 
 public class RepoItems {
 
-    private List<GithubRepo> items ;
+    private List<GithubRepo> items;
 
     public List<GithubRepo> getItems() {
         return items;
-    }
-
-    public void setItems(List<GithubRepo> items) {
-        this.items = items;
     }
 
 }

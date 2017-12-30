@@ -75,7 +75,6 @@ public class RepoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             repoViewHolder.repoOwner.setText(repositery.getOwner().getLogin());
             repoViewHolder.repoStars.setText(String.valueOf(repositery.getNumberOfStars()));
             Picasso.with(activity.getApplicationContext()).load(repositery.getOwner().getAvatarUrl()).into(repoViewHolder.avatarImage);
-            //repoViewHolder.avatarImage.setImageURI(Uri.parse(repositery.getAvatarUrl()));
         }
 
     }

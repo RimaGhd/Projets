@@ -65,15 +65,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(toolbar);
-        handler = new Handler();
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         tvEmptyView = (TextView)findViewById(R.id.tvEmptyView);
         tvHeaderTitle = (TextView)findViewById(R.id.header_title);
         bottomNavigationView = (BottomNavigationView)findViewById(R.id.bottom_navigation);
+
+        setSupportActionBar(toolbar);
+        handler = new Handler();
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
@@ -82,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(mAdapter);
 
         actionBar=getSupportActionBar();
-
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
 
             @Override
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                         createGithubAPI(pageNumber);
                         mAdapter.setLoaded();
                     }
-                }, 1000);
+                }, 2000);
                 System.out.println("load");
             }
         });
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     mAdapter.setData(model);
 
-                    if (repoList.getItems().size() == 0) {
+                    if (repoList.getItems().isEmpty()) {
                         recyclerView.setVisibility(View.GONE);
                         tvEmptyView.setVisibility(View.VISIBLE);
 
@@ -168,7 +168,6 @@ public class MainActivity extends AppCompatActivity {
                         tvEmptyView.setVisibility(View.GONE);
                     }
                 }
-
             }
 
             @Override
@@ -179,8 +178,5 @@ public class MainActivity extends AppCompatActivity {
                 tvEmptyView.setVisibility(View.VISIBLE);
             }
         });
-
     }
-
-
 }

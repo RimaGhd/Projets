@@ -25,26 +25,11 @@ public class GithubRepo {
     @Expose
     int numberOfStars;
 
-    @SerializedName("avatar_url")
-    @Expose
-    String avatarUrl;
-
     public GithubRepo(String name, RepoOwner owner, String description, int numberOfStars) {
         this.name = name;
         this.owner = owner;
         this.description = description;
         this.numberOfStars = numberOfStars;
-    }
-
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-
-    public GithubRepo() {
     }
 
     public String getName() {
@@ -59,24 +44,12 @@ public class GithubRepo {
         return owner;
     }
 
-    public void setOwner(RepoOwner owner) {
-        this.owner = owner;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public int getNumberOfStars() {
         return numberOfStars;
-    }
-
-    public void setNumberOfStars(int numberOfStars) {
-        this.numberOfStars = numberOfStars;
     }
 
 
